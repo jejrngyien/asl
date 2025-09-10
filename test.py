@@ -1,0 +1,1 @@
+print("MS Pojekt Sose2025")
