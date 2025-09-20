@@ -37,7 +37,6 @@ A two-phase pipeline for recognizing **static** (fingerspelling) and **dynamic**
 ## 4) Data Augmentation
 
 * **Spatial:** Light affine jitter (small rotations/translations/scale) and mild color jitter to increase robustness without altering semantics.
-* **Horizontal Flip:** Avoid for the **alphabet** (mirroring can change the sign or mismatch real data); for word-level signs, consider cautiously only if semantics are symmetric across handedness.
 * **Temporal:** Start jitter and stride variation to simulate speed differences; **no temporal reversal** (often changes the sign’s meaning).
 
 ---
