@@ -10,13 +10,11 @@ Expected dataset layout:
 # Static images, T=1
 python training.py \
   --data-type static \
-  --img-size 112 --frames 1 \
 
 # Dynamic videos, T=16
 python training.py \
   --data /path/to/asl_dynamic_root \
   --data-type dynamic \
-  --img-size 112 --frames 16 \
 """
 import argparse
 import json
@@ -28,7 +26,15 @@ from PIL import Image
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, Dataset
-from torch.cuda.amp import autocast, GradScaler
+#from torch.cuda.amp import autocast, GradScaler
+#from torch.amp import autocast, GradScaler
+try:
+   from torch.amp import autocast, GradScaler   # PyTorch ≥ 2.0
+   USING_TORCH2 = True
+except Exception:
+   from torch.cuda.amp import autocast, GradScaler  # PyTorch 1.x
+   USING_TORCH2 = False
+
 
 from models import build_model
 from metrics import topk_accuracy, ConfusionMatrix
@@ -237,7 +243,8 @@ def train_one_epoch(model, loader, criterion, optimizer, device, scaler: GradSca
 
         optimizer.zero_grad(set_to_none=True)
         if amp:
-            with autocast():
+            ctx = autocast(device_type=device.type, enabled=amp) if USING_TORCH2 else autocast(enabled=amp)
+            with ctx:
                 outputs = model(clips)
                 loss = criterion(outputs, targets)
             scaler.scale(loss).backward()
@@ -314,7 +321,7 @@ def main():
     parser.add_argument("--save-dir", type=str, default="./runs/exp")
     parser.add_argument("--device", choices=["auto", "cpu", "cuda"], default="auto")
     args = parser.parse_args()
-    epochs: int = 2
+    epochs: int = 40
     batch_size: int = 32
     workers: int = 8
     img_size: int = 112
@@ -322,7 +329,7 @@ def main():
     learning_rate: float = 3e-4
     dropout: float = 0.5
     weight_decay: float = 1e-4
-
+    
 
     # Device selection
     if args.device == "cpu":
@@ -332,6 +339,7 @@ def main():
     else:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
+    if device.type == "cpu": workers = 0 
 
     set_seed(42)
 
@@ -354,7 +362,8 @@ def main():
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
-    scaler = GradScaler(enabled=(device.type == "cuda"))
+    #scaler = GradScaler(device_type='cuda', enabled=(device.type == 'cuda'))
+    scaler = GradScaler(enabled=(device.type == 'cuda'))
 
     # Train loop (select best by Macro-F1 for class fairness)
     best_metric = -1.0
