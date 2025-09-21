@@ -263,6 +263,7 @@ def train_one_epoch(model, loader, criterion, optimizer, device, scaler: GradSca
     acc5 = 100.0 * correct_top5 / max(1, n_samples)
     return {"loss": avg_loss, "acc1": acc1, "acc5": acc5}
 
+
 @torch.no_grad()
 def evaluate(model, loader, criterion, device, num_classes: int):
     model.eval()
@@ -313,9 +314,9 @@ def main():
     parser.add_argument("--save-dir", type=str, default="./runs/exp")
     parser.add_argument("--device", choices=["auto", "cpu", "cuda"], default="auto")
     args = parser.parse_args()
-    epochs: int = 20
+    epochs: int = 2
     batch_size: int = 32
-    workers: int = 4
+    workers: int = 8
     img_size: int = 112
     frames: int = 1 if args.data_type == "static" else 16
     learning_rate: float = 3e-4
