@@ -46,7 +46,6 @@ A two-phase pipeline for recognizing **static** (fingerspelling) and **dynamic**
 * **Top-1 / Top-5 Accuracy:** Primary correctness (Top-1) and candidate-set coverage (Top-5) - useful when visually similar classes compete.
 * **Macro-F1:** Class-balanced view that prevents frequent classes from dominating the metric - important for the typically imbalanced word-level distributions.
 * **Confusion Matrix:** Reveals **which** signs are conflated (e.g., similar handshapes or motions), guiding targeted data or augmentation fixes.
-* **Signer-Independent Test:** Ensures the model genuinely **generalizes across people**, avoiding “recognizing the signer” instead of the sign (the central validity criterion for this task).
 
 ---
 
@@ -63,14 +62,13 @@ A two-phase pipeline for recognizing **static** (fingerspelling) and **dynamic**
 
 1. **Class Selection:** Choose 20–50 frequent glosses (e.g., from WLASL-100/300).
 2. **Acquisition & Spot-Check:** Download clips per official repo; verify sample quality/labels.
-3. **Signer-Independent Splits:** Partition by `signer_id` (train/val/test without overlap).
-4. **Preprocessing:** Apply `bbox` crops; resize/normalize.
-5. **Clip Sampling:** Use T=16 (adjust stride to cover the sign).
-6. **Backbones:** Implement **R(2+1)D** and **C3D** for comparison (pretrained where applicable).
-7. **Augmentation:** Spatial light jitter; temporal jitter/stride; avoid reversal.
-8. **Training:** Clean setup, checkpoints, early stopping.
-9. **Evaluation:** Top-1/Top-5, Macro-F1, confusion matrix on signer-independent test.
-10. **Analysis:** Identify confusions; consider dataset adjustments and, if needed, **SlowFast** as an accuracy upgrade path.
+3. **Preprocessing:** Apply `bbox` crops; resize/normalize.
+4. **Clip Sampling:** Use T=16 (adjust stride to cover the sign).
+5. **Backbones:** Implement **R(2+1)D** and **C3D** for comparison (pretrained where applicable).
+6. **Augmentation:** Spatial light jitter; temporal jitter/stride; avoid reversal.
+7. **Training:** Clean setup, checkpoints, early stopping.
+8. **Evaluation:** Top-1/Top-5, Macro-F1, confusion matrix on signer-independent test.
+9. **Analysis:** Identify confusions; consider dataset adjustments and, if needed, **SlowFast** as an accuracy upgrade path.
 
 **Phase 3: Wrap-Up**
 
@@ -98,7 +96,3 @@ MediaPipe Hands — 21 hand landmarks (image/world coordinates). ([mediapipe.rea
 [7]: https://openaccess.thecvf.com/content_WACV_2020/papers/Li_Word-level_Deep_Sign_Language_Recognition_from_Video_A_New_Large-scale_WACV_2020_paper.pdf?utm_source=chatgpt.com "Word-level Deep Sign Language Recognition from Video"
 [8]: https://mediapipe.readthedocs.io/en/latest/solutions/hands.html?utm_source=chatgpt.com "MediaPipe Hands - Read the Docs"
 [9]: https://github.com/dxli94/WLASL "GitHub - dxli94/WLASL: WACV 2020 \"Word-level Deep Sign Language Recognition from Video: A New Large-scale Dataset and Methods Comparison\""
-
-
-
-
