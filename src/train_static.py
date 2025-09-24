@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Training script for ASL classification using 3D CNNs (C3D or R(2+1)D).
+Training script for ASL static classification using 3D CNNs (C3D or R(2+1)D).
 
 Expected dataset layout:
     root/
@@ -10,11 +10,6 @@ Expected dataset layout:
 # Static images, T=1
 python training.py \
   --data-type static \
-
-# Dynamic videos, T=16
-python training.py \
-  --data /path/to/asl_dynamic_root \
-  --data-type dynamic \
 """
 import argparse
 import json
@@ -329,7 +324,7 @@ def main():
     learning_rate: float = 3e-4
     dropout: float = 0.5
     weight_decay: float = 1e-4
-    
+
 
     # Device selection
     if args.device == "cpu":
@@ -339,7 +334,7 @@ def main():
     else:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
-    if device.type == "cpu": workers = 0 
+    if device.type == "cpu": workers = 0
 
     set_seed(42)
 
