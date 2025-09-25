@@ -24,9 +24,6 @@ dataset_root/
          'labels': LongTensor  [N]
          'class_names': List[str]
        }
-   - Basic support for videos is included (expects already‑cropped clips in the
-     processed folder). Images remain the expected primary use case here.
-    - as_tensors=True will load all images into RAM
 """
 from __future__ import annotations
 

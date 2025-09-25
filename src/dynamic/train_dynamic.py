@@ -27,8 +27,8 @@ from torch.utils.data import DataLoader, Dataset
 from torch.utils.tensorboard import SummaryWriter
 from torch.cuda.amp import autocast, GradScaler
 
-from models import build_model
-from metrics import topk_accuracy, ConfusionMatrix, EpochMetrics, plot_confusion_matrix, save_confusion_assets
+from ..models import build_model
+from ..metrics import topk_accuracy, ConfusionMatrix, EpochMetrics, plot_confusion_matrix, save_confusion_assets
 
 
 

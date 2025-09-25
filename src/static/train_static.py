@@ -12,6 +12,7 @@ python training.py \
   --data-type static \
 """
 import argparse
+import random
 import json
 import time
 from pathlib import Path
@@ -23,18 +24,17 @@ import torch.nn as nn
 from torch.utils.data import DataLoader, Dataset
 #from torch.cuda.amp import autocast, GradScaler
 #from torch.amp import autocast, GradScaler
+import cv2  
 try:
-   from torch.amp import autocast, GradScaler   # PyTorch ≥ 2.0
+   from torch.amp import autocast, GradScaler  # PyTorch ≥ 2.0
    USING_TORCH2 = True
 except Exception:
    from torch.cuda.amp import autocast, GradScaler  # PyTorch 1.x
    USING_TORCH2 = False
 
+from ..models import build_model
+from ..metrics import topk_accuracy, ConfusionMatrix
 
-from models import build_model
-from metrics import topk_accuracy, ConfusionMatrix
-
-import cv2  # only required for dynamic (video) mode
 
 
 IMAGENET_MEAN = (0.485, 0.456, 0.406)
@@ -45,7 +45,6 @@ VID_EXTS = {".mp4", ".avi", ".mov", ".mkv"}
 
 ### Utilities
 def set_seed(seed: int = 42):
-    import random
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
@@ -61,8 +60,8 @@ class To3DClip:
 
 def pil_to_tensor_normalized(im: Image.Image) -> torch.Tensor:
     """PIL RGB -> float tensor [C,H,W] normalized by ImageNet stats."""
-    x = torch.from_numpy(np.array(im, dtype=np.uint8))  # H,W,C uint8
-    x = x.permute(2, 0, 1).float() / 255.0             # C,H,W
+    x = torch.from_numpy(np.array(im, dtype=np.uint8))  # H,W,C
+    x = x.permute(2, 0, 1).float() / 255.0  # C,H,W
     mean = torch.tensor(IMAGENET_MEAN).view(-1,1,1)
     std  = torch.tensor(IMAGENET_STD).view(-1,1,1)
     return (x - mean) / std
@@ -125,7 +124,7 @@ class StaticImageDataset(Dataset):
             im = Image.open(p).convert("RGB")
             im = resize_center_crop(im, img_size)
             x = pil_to_tensor_normalized(im)  # [C,H,W]
-            x = to3d(x)                       # [C,T,H,W]
+            x = to3d(x)  # [C,T,H,W]
             label = class_to_idx[p.parent.name]
             self.data.append((x, label))
     def __len__(self) -> int: return len(self.data)
@@ -140,7 +139,7 @@ class DynamicVideoDataset(Dataset):
         self.img_size = img_size
         self.T = max(1, int(T_frames))
         for p in files:
-            clip = self._load_video_clip(p)         # [C,T,H,W]
+            clip = self._load_video_clip(p)  # [C,T,H,W]
             label = class_to_idx[p.parent.name]
             self.data.append((clip, label))
     def __len__(self) -> int: return len(self.data)

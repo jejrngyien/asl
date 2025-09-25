@@ -22,9 +22,9 @@ def topk_accuracy( logits: torch.Tensor, targets: torch.Tensor, topk: Sequence[i
     If a requested k > num_classes, it is clipped to num_classes.
     """
     maxk = min(max(topk), logits.size(1))
-    _, pred = logits.topk(k=maxk, dim=1, largest=True, sorted=True)  # [B, maxk]
-    pred = pred.t()                                                  # [maxk, B]
-    correct = pred.eq(targets.view(1, -1).expand_as(pred))           # [maxk, B]
+    _, pred = logits.topk(k=maxk, dim=1, largest=True, sorted=True) 
+    pred = pred.t()                                                  
+    correct = pred.eq(targets.view(1, -1).expand_as(pred))      
 
     res = []
     batch_size = targets.size(0)
@@ -92,7 +92,7 @@ class ConfusionMatrix:
         return float(f1.mean().item())
 
 
-# -------------------- Epoch accumulator --------------------
+### Epoch accumulator 
 class EpochMetrics:
     """
     Accumulates running metrics over an epoch for train/eval phases.
