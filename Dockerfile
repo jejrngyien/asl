@@ -7,9 +7,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libgl1 libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies first (better layer caching)
+# Install Python dependencies first (better layer caching).
+# Install the CPU-only build of PyTorch to keep the image small — this API
+# runs inference on CPU, so the multi-GB CUDA wheels are not needed.
 COPY api/requirements.txt api/requirements.txt
-RUN pip install --no-cache-dir -r api/requirements.txt
+RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu \
+    && pip install --no-cache-dir -r api/requirements.txt
 
 # Copy the model definition and the API service
 COPY src/ src/
