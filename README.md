@@ -1,5 +1,11 @@
 # ASL Recognition with 3D CNNs (Python / PyTorch)
 
+<p align="center">
+  <a href="https://asl-demo-8ubwp8umsiauhfxadbvuqt.streamlit.app/">
+    <img src="https://img.shields.io/badge/%F0%9F%9A%80%20Live%20Demo-Try%20it%20now-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white" alt="Live Demo">
+  </a>
+</p>
+
 > End-to-end deep learning pipeline that recognizes American Sign Language from images and video — MediaPipe hand cropping, C3D / R(2+1)D-18 backbones, transfer learning from Kinetics-400, and a live webcam demo.
 
 A practical pipeline for **American Sign Language (ASL)** recognition covering **static fingerspelling (T=1)** and **dynamic word-level clips (T>1)**. It focuses on **hand-centric preprocessing** (MediaPipe crops), **augmentation**, efficient **C3D / R(2+1)D-18** backbones, and clean **train/eval loops**.
@@ -7,9 +13,11 @@ A practical pipeline for **American Sign Language (ASL)** recognition covering *
 **Highlights:** R(2+1)D reaches **91.9% Top-1** on the static ASL alphabet; transfer learning lifts dynamic word-level accuracy from **~10% to ~30%** in a low-data regime. Built with Python, PyTorch, torchvision, and MediaPipe.
 
 <p align="center">
-  <img src="documents/demo.gif" alt="Live webcam demo — real-time ASL fingerspelling recognition" width="480">
+  <a href="https://asl-demo-8ubwp8umsiauhfxadbvuqt.streamlit.app/">
+    <img src="documents/demo.gif" alt="Live webcam demo — real-time ASL fingerspelling recognition" width="480">
+  </a>
   <br>
-  <em>Live webcam demo: real-time ASL fingerspelling with per-frame Top-3 predictions and confidence.</em>
+  <em>Real-time ASL fingerspelling with per-frame Top-3 predictions — <a href="https://asl-demo-8ubwp8umsiauhfxadbvuqt.streamlit.app/">try the live demo →</a></em>
 </p>
 
 📄 A one-page project **[poster](poster.pdf)** summarizes the approach and results.
