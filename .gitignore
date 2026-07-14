@@ -284,3 +284,10 @@ $RECYCLE.BIN/
 ## Added
 data/*
 runs/*
+
+# Raw video recordings (source for the demo GIF; the GIF itself is force-added)
+*.mp4
+*.mov
+*.mkv
+*.avi
+*.webm

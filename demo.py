@@ -21,13 +21,16 @@ try:
 except Exception:
     tv_r2plus1d_18 = None
 
-# Deine eigenen Modelle
+# Deine eigenen Modelle (C3D / R(2+1)D). Das Paket liegt unter src/,
+# beim Ausführen als Skript vom Repo-Root ist "src" importierbar.
 BUILD_MODEL = None
-try:
-    from models import build_model as _bm
-    BUILD_MODEL = _bm
-except Exception:
-    BUILD_MODEL = None
+for _imp in ("src.models", "models"):
+    try:
+        from importlib import import_module
+        BUILD_MODEL = import_module(_imp).build_model
+        break
+    except Exception:
+        BUILD_MODEL = None
 
 IMAGENET_MEAN = (0.485, 0.456, 0.406)
 IMAGENET_STD  = (0.229, 0.224, 0.225)

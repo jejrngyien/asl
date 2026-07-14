@@ -1,7 +1,18 @@
----
 # ASL Recognition with 3D CNNs (Python / PyTorch)
 
+> End-to-end deep learning pipeline that recognizes American Sign Language from images and video — MediaPipe hand cropping, C3D / R(2+1)D-18 backbones, transfer learning from Kinetics-400, and a live webcam demo.
+
 A practical pipeline for **American Sign Language (ASL)** recognition covering **static fingerspelling (T=1)** and **dynamic word-level clips (T>1)**. It focuses on **hand-centric preprocessing** (MediaPipe crops), **augmentation**, efficient **C3D / R(2+1)D-18** backbones, and clean **train/eval loops**.
+
+**Highlights:** R(2+1)D reaches **91.9% Top-1** on the static ASL alphabet; transfer learning lifts dynamic word-level accuracy from **~10% to ~30%** in a low-data regime. Built with Python, PyTorch, torchvision, and MediaPipe.
+
+<p align="center">
+  <img src="documents/demo.gif" alt="Live webcam demo — real-time ASL fingerspelling recognition" width="480">
+  <br>
+  <em>Live webcam demo: real-time ASL fingerspelling with per-frame Top-3 predictions and confidence.</em>
+</p>
+
+📄 A one-page project **[poster](poster.pdf)** summarizes the approach and results.
 
 ---
 
@@ -95,25 +106,44 @@ We use the official repository (Li et al., WACV’20). WLASL provides JSON metad
 
 ## 4) Repo Overview
 
-- **`aug_dynamic.py`** — Dynamic preprocessing & **temporally consistent** augmentation; MediaPipe **union hand box** over a stride; writes `preprocessed/`, `augmented/`, and `metadata.json` / `splits.json`.
+```text
+.
+├── demo.py                        # Webcam inference demo
+├── requirements.txt
+├── src/
+│   ├── models.py                  # C3D & R(2+1)D-18 backbones + classifier head
+│   ├── metrics.py                 # Top-k, confusion matrix, Macro-F1
+│   ├── static/
+│   │   ├── aug_static.py          # Static preprocessing & augmentation
+│   │   └── train_static.py        # Unified static/dynamic trainer
+│   └── dynamic/
+│       ├── aug_dynamic.py         # Dynamic (clip) preprocessing & augmentation
+│       ├── train_dynamic.py       # From-scratch C3D / R(2+1)D trainer
+│       └── train_dynamic_tune.py  # Fine-tune torchvision R(2+1)D-18
+└── utils/
+    ├── extract_frames.py          # Video → frames
+    └── organize_wlasl.py          # Flat WLASL videos → per-class folders
+```
 
-- **`train_dynamic.py`** — Trains **C3D / R(2+1)D** on **frame-folder clips** with **RAM caching**; tests every epoch; TensorBoard + CSV/JSON history; confusion assets.
+- **[`src/dynamic/aug_dynamic.py`](src/dynamic/aug_dynamic.py)** — Dynamic preprocessing & **temporally consistent** augmentation; MediaPipe **union hand box** over a stride; writes `preprocessed/`, `augmented/`, and `metadata.json` / `splits.json`.
 
-- **`train_dynamic_tune.py`** — **Fine-tunes** torchvision `r2plus1d_18` (Kinetics-400): staged freezing (`stem/layer1/layer2`), BN eval-freeze, **separate LRs** (backbone/head), **configurable unfreeze epoch**.
+- **[`src/dynamic/train_dynamic.py`](src/dynamic/train_dynamic.py)** — Trains **C3D / R(2+1)D** on **frame-folder clips** with **RAM caching**; tests every epoch; TensorBoard + CSV/JSON history; confusion assets.
 
-- **`train_static.py`** — Unified trainer for **static (T=1)** and **dynamic (videos)**; careful AMP handling for **PyTorch 1.x / 2.x**.
+- **[`src/dynamic/train_dynamic_tune.py`](src/dynamic/train_dynamic_tune.py)** — **Fine-tunes** torchvision `r2plus1d_18` (Kinetics-400): staged freezing (`stem/layer1/layer2`), BN eval-freeze, **separate LRs** (backbone/head), **configurable unfreeze epoch**.
 
-- **`aug_static.py`** — Static preprocessing & augmentation with MediaPipe hands; creates `metadata.json` + `splits.json`; outputs `preprocessed/` and `augmented/`.
+- **[`src/static/train_static.py`](src/static/train_static.py)** — Unified trainer for **static (T=1)** and **dynamic (videos)**; careful AMP handling for **PyTorch 1.x / 2.x**.
 
-- **`models.py`** — **C3D** and **R(2+1)D-18** backbones (temporal preserved), **global average pool**, classifier head.
+- **[`src/static/aug_static.py`](src/static/aug_static.py)** — Static preprocessing & augmentation with MediaPipe hands; creates `metadata.json` + `splits.json`; outputs `preprocessed/` and `augmented/`.
 
-- **`metrics.py`** — Top-k accuracy, running **confusion matrix**, **Macro-F1**, plotting/saving utilities.
+- **[`src/models.py`](src/models.py)** — **C3D** and **R(2+1)D-18** backbones (temporal preserved), **global average pool**, classifier head.
 
-- **`extract_frames.py`** — Extract frames from videos with **Resize(short=128) + CenterCrop(112)**; configurable `--stride` (e.g., every 2nd frame).
+- **[`src/metrics.py`](src/metrics.py)** — Top-k accuracy, running **confusion matrix**, **Macro-F1**, plotting/saving utilities.
 
-- **`organize_wlasl.py`** — From flat WLASL videos + JSON annotations to **per-class** folders; copy/move and preview CSVs.
+- **[`utils/extract_frames.py`](utils/extract_frames.py)** — Extract frames from videos with **Resize(short=128) + CenterCrop(112)**; configurable `--stride` (e.g., every 2nd frame).
 
-- **`demo.py`** — Webcam demo (static/dynamic), optional MediaPipe crop, robust checkpoint loader (custom or torchvision), class discovery, on-screen Top-k.
+- **[`utils/organize_wlasl.py`](utils/organize_wlasl.py)** — From flat WLASL videos + JSON annotations to **per-class** folders; copy/move and preview CSVs.
+
+- **[`demo.py`](demo.py)** — Webcam demo (static/dynamic), optional MediaPipe crop, robust checkpoint loader (custom or torchvision), class discovery, on-screen Top-k.
 
 ---
 
@@ -122,14 +152,17 @@ We use the official repository (Li et al., WACV’20). WLASL provides JSON metad
 **Install**
 
 ```bash
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
-pip install mediapipe opencv-python pillow tensorboard matplotlib
+# 1) Install PyTorch (pick the build matching your CUDA / CPU setup):
+pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
+
+# 2) Install the remaining dependencies:
+pip install -r requirements.txt
 ```
 
 **1) Organize WLASL (dynamic)**
 
 ```bash
-python organize_wlasl.py \
+python utils/organize_wlasl.py \
   --src /path/flat_videos \
   --ann /path/wlasl.json \
   --out /path/wlasl_by_class \
@@ -140,30 +173,34 @@ python organize_wlasl.py \
 **2) (Optional) Extract frames (e.g., every 2nd frame)**
 
 ```bash
-python extract_frames.py \
+python utils/extract_frames.py \
   --src /path/wlasl_by_class \
   --dst /path/wlasl_frames \
   --stride 2
 ```
 
+> **Note:** the code under `src/` is a Python package. Run the training/augmentation
+> scripts as **modules from the repo root** (`python -m src....`) so the internal
+> imports resolve correctly.
+
 **3) Static preprocessing & augmentation**
 
 ```bash
-python aug_static.py /path/asl_alphabet \
+python -m src.static.aug_static /path/asl_alphabet \
   --dst_root /path/asl_static_processed
 ```
 
 **4) Dynamic preprocessing & temporally consistent augmentation**
 
 ```bash
-python aug_dynamic.py /path/wlasl_by_class \
+python -m src.dynamic.aug_dynamic /path/wlasl_by_class \
   --dst_root /path/wlasl_processed_dyn
 ```
 
 **5) Train (static)**
 
 ```bash
-python train_static.py \
+python -m src.static.train_static \
   --data /path/asl_static_processed \
   --data-type static \
   --model r2plus1d \
@@ -173,7 +210,7 @@ python train_static.py \
 **6) Train (dynamic)**
 
 ```bash
-python train_dynamic.py \
+python -m src.dynamic.train_dynamic \
   --data-root /path/wlasl_frame_data \
   --model r2plus1d \
   --save-dir runs/asl_dynamic
@@ -182,7 +219,7 @@ python train_dynamic.py \
 **7) Fine-tune torchvision R(2+1)D-18 (Kinetics-400)**
 
 ```bash
-python train_dynamic_tune.py \
+python -m src.dynamic.train_dynamic_tune \
   --data-root /path/wlasl_frame_data \
   --save-dir runs/asl_dynamic_ft
 ```
@@ -238,11 +275,11 @@ python demo.py \
 
 
 
-![Pipeline Diagram](documents/static_c3d.png)
+![Static C3D — training curves and confusion matrix](documents/static_c3d.png)
 
 
 
-![Pipeline Diagram](documents/static_R21D.png)
+![Static R(2+1)D — training curves and confusion matrix](documents/static_R21D.png)
 
 
 
@@ -256,7 +293,7 @@ python demo.py \
 
 
 
-![Pipeline Diagram](documents/dynamic_R21D.png)
+![Dynamic R(2+1)D fine-tuned — training curves and confusion matrix](documents/dynamic_R21D.png)
 
 
 

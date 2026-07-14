@@ -1,0 +1,18 @@
+# Core deep learning
+# For CUDA builds install torch/torchvision from the PyTorch index, see README:
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
+torch>=2.0
+torchvision>=0.15
+
+# Hand detection / preprocessing
+# NOTE: mediapipe is pinned. Versions >= ~0.10.15 dropped the legacy
+# `mediapipe.solutions.hands` API this project relies on.
+mediapipe==0.10.14
+opencv-python>=4.8
+pillow>=9.5
+numpy>=1.24
+
+# Metrics, plotting, logging
+matplotlib>=3.7
+# tensorboard capped so its protobuf requirement stays compatible with mediapipe 0.10.14 (protobuf 4.x)
+tensorboard>=2.13,<2.18
