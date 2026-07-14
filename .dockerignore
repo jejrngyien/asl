@@ -1,0 +1,11 @@
+.git/
+.venv/
+venv/
+runs/
+data/
+documents/
+__pycache__/
+*.pyc
+*.pdf
+*.gif
+model.pt
