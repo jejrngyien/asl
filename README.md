@@ -1,7 +1,4 @@
-Nice! I gave your README a careful pass for clarity, formatting, grammar, and consistency with your code and workflow. Below is a **clean, drop-in replacement** that preserves your structure, fixes wording, and makes the commands and paths copy-paste friendly. I also folded in your final results narrative (incl. the data-scale caveat for dynamic ASL and limited augmentation gains).
-
 ---
-
 # ASL Recognition with 3D CNNs (Python / PyTorch)
 
 A practical pipeline for **American Sign Language (ASL)** recognition covering **static fingerspelling (T=1)** and **dynamic word-level clips (T>1)**. It focuses on **hand-centric preprocessing** (MediaPipe crops), **augmentation**, efficient **C3D / R(2+1)D-18** backbones, and clean **train/eval loops**.
